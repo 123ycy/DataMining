@@ -1,0 +1,46 @@
+import re
+import math
+
+dataset = [] #存放数据集
+distances = []  #存放距离
+votes = {} #投票分类
+datalen = 0 #单个数据长度
+
+with open(r'C:\Users\ycy大帅比\Desktop\软基和数挖\树蛙\iris.2D.train.csv',"r") as shuju:
+    for line in shuju.readlines():
+        data = re.split(",",line.strip()) #按照','分隔，去除空格
+        #print(data)
+        datalen = len(data)
+        dataset.append(data)
+        #print(dataset)
+
+def findNN(testData , k):  #带入测试点并且设置K，本实验设置为(5,10)
+    for data in dataset[1:]:
+        distances.append(computeDis(testData,data))  #计算距离并加入于数组
+    #print(distances)
+    return (sorted(range(len(distances)),key = lambda m:distances[m]))[:k]
+
+def computeDis(x,y):  #计算欧式距离，欧式距离就是普通两点的直线距离
+    return math.sqrt(math.pow(float(x[0])-float(y[0]),2)+math.pow(float(x[1])-float(y[1]),2))
+
+def vote(indexs):  #投票，距离代入点最近的K个点，谁出现频率最高就属于哪一类
+    #print(indexs)
+    for i in indexs:
+        label = dataset[i][datalen-1]  #获取数据的种类
+        #print(label)
+        if label not in votes.keys():    #判断标签是否在votes中，如果不在就置为1
+            votes[label] = 1
+        else:                               #如果是就加1
+            votes[label] = votes[label] + 1
+    return (max(votes,key = votes.get))     #最后返回votes中value最大的一类标签
+
+def main(): #主函数,分三个点测试结果
+    # print('第一个测试点为：[5,10]')
+    # print("第一个测试点属于的类为：%s"%(vote(findNN(['5','10'],5))))
+    # print('第二个测试点为：[2,2]')
+    # print("第二个测试点属于的类为：%s" % (vote(findNN(['2', '2'], 5))))
+    print('第三个测试点为：[10,10]')
+    print("第三个测试点属于的类为：%s" % (vote(findNN(['1', '10'], 3))))
+#print(dataset)
+
+main()
