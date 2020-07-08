@@ -1,0 +1,67 @@
+import numpy as np
+import pandas as pd
+from collections import Counter
+
+#读取iris数据
+def lodairsi(address):   #读取数据
+    spf = pd.read_csv(address, sep=',', index_col=False, header=None)
+    strs = spf[4]
+    #print(strs)
+    spf.drop([4], axis=1, inplace=True)     #删除第五列
+    return spf.values, strs
+
+#特征值筛选
+def featureSelection(features ,label):
+    featureLen = len(features[0,:]) #获取特征向量长度
+    label_count = Counter(label)
+    samples_energy = 0.0
+    data_len = len(label)
+    for i in label_count.keys():
+        label_count[i]/= float(data_len)  #获取频率
+        samples_energy -= label_count[i] * np.log2(label_count[i]) #计算信息熵
+
+    informationGain = []
+
+    for f in range(featureLen): #计算过程
+        af = features[1:,f]
+        #print(af)
+        minf = float(np.min(af)) #找出最小值
+        # print(minf)
+        #print(type(minf))
+        maxf = float(np.max(af)) + 1e-4  #找出最大值
+        width = (maxf -minf)/10.0        #计算区间长度
+        #print(width)
+        #print(type(width))
+        #print(type(af)
+        d = (af.astype(np.float) -minf) /width
+        dd = np.floor(d)            #找出数据下限
+        #print(dd)
+        c = Counter(dd)    #计数
+        # print(c)
+
+        sub_energy = getEnergy(c ,dd ,label)    #获取数据集信息熵
+        informationGain.append((samples_energy - sub_energy))  #计算信息增益
+    return informationGain
+
+def getEnergy(c,data,label):  #计算数据集信息熵
+    dataLen = len(label)  #获取标签长度
+    label = label[1:]   #获取标签
+    #print(label)
+    #print(dataLen)
+    energy = 0.0
+    for key , value in c.items():
+        c[key] /= float(dataLen)   #获取出现的频率
+        label_picked = label[data == key]
+        l = Counter(label_picked)
+        e = 0.0
+        for k,v in l.items():
+            r = v/float(value)
+            e -= r*np.log2(r)  #根据熵的计算公式计算
+        energy += c[key] * e
+    return energy
+
+if __name__ == "__main__":
+    filepath = "D:\weka\Weka-3-8\data\iris.csv"
+    data_matrix , str_name = lodairsi(filepath)
+    informationGain = featureSelection(data_matrix,str_name.values)
+    print( informationGain)
