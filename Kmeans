@@ -1,0 +1,89 @@
+import numpy as np
+import pandas as pd
+import math
+from pandas import DataFrame
+import matplotlib.pyplot as plt
+import  random
+
+
+#导入数据
+def loadDataset():
+    df1 = open(r'D:\pycode1\数据挖掘与大数据分析\data.txt','r')
+    data = []
+    for i in df1.readlines(): #指导书的步骤有些问题，个人readlines读取数据
+        i = i.strip('\n').split()
+        #print(i)
+        data.append((float(i[0]),float(i[1])))
+    #print(data)
+    #df = pd.read_csv(infile,sep = ' ',header = 0,dtype=str,na_filter=False)
+    #print(df)
+    #return pd.array(data[:1]).astype(np.float)  #转换为float
+    return  data
+
+
+def distance(x,y):   #计算欧式距离
+    return math.sqrt(pow(x[0]-y[0],2)+pow(x[1]-y[1],2))
+
+data = loadDataset()  #加载数据
+k = 3 #设置K值为3
+def Kmeans(data,k):
+    clusters = []
+    for i in range(k):
+        clusters.append([])
+        clusters[i].append((random.random() * 100, random.random() * 100)) #先随机生成若干个点，放置于clusters
+    #print(clusters)
+    changed = True
+    num = 0
+    while (changed == True):  #迭代循环
+        num = num + 1
+        changed = False
+        for point in data:
+            minD = 1000   #先设置一个minD的值
+            for i in range(k):
+                dis = distance(clusters[i][0], point)   #计算随机点和data中点的距离
+                if dis < minD:    #更替最小距离和序号
+                    minP = i
+                    minD = dis
+            if point not in clusters[minP]: #判断point是否等于其本身
+                for i in range(k):
+                    if point in clusters[i]:  #判断point是否在clusters内
+                        clusters[i].remove(point)  #有则去除，因为如果有则会出现两个相同的点
+                        break
+                clusters[minP].append(point)   #没有就加到对应为距离最小的序号中
+                changed = True
+        for i in range(k):    #找出该簇的中心点，利用横纵坐标的中心值
+            x = 0
+            y = 0
+            for j in clusters[i][1:]:  #遍历clusters，计算横坐标x和纵坐标y之和
+                x = x + j[0]
+                y = y + j[1]
+            if len(clusters[i]) != 1:
+                clusters[i][0] = (x / (len(clusters[i]) - 1), y / (len(clusters[i]) - 1)) #找出中心点
+    return clusters
+
+#绘制图形
+def paint():
+    clusters = Kmeans(data,k)
+    for i in range(k):
+        print('第' + str(i + 1) + '个簇:')
+        print('中心点为:')
+        print(clusters[i][0])
+        print('周围点:')
+        for item in clusters[i][1:]:
+            print(item)
+            if i == 0:            #绘制颜色
+                color = 'purple'
+            elif i == 1:
+                color = 'green'
+            else:
+                color = 'red'
+            plt.scatter(x=item[0], y=item[1], c=color)
+    plt.show()
+
+def main():  #主函数
+    paint()
+
+if __name__ == '__main__':
+    main()
+
+
