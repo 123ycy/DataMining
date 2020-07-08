@@ -1,0 +1,23 @@
+def calculate(x,y):
+    n = len(x)
+    n1 = 0
+    n2 = 0
+    for i in range(0, len(x)):
+        for j in range(i, len(x)):
+            if ((x[i] < x[j]) & (y[i] < y[j])) | ((x[i] > x[j]) & (y[i] > y[j])):
+                n1 += 1
+            elif ((x[i] < x[j]) & (y[i] > y[j])) | ((x[i] > x[j]) & (y[i] < y[j])):
+                n2 += 1
+    t = 2 * (n1 - n2) / (n * (n - 1))
+    return t
+
+x1=[1,2,3,4,5,6]
+y1=[6,5,4,3,2,1]
+print(calculate(x1,y1))
+#测试PPT数据
+x2 = [4,2,8,14,	7,2,1,4,8,16]
+y2 = [5,6,18,2,1,11	,7,	5,7, 	5]
+print(calculate(x2,y2))
+x3 = [2	,1,	8,	6,	5,	7	,9,	14,	3,	16]
+y3 = [3,	5,	6,	11,	4	,12,	7	,2	,1	,18]
+print(calculate(x3,y3))
