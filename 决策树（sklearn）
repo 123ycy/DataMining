@@ -1,0 +1,43 @@
+from sklearn import tree
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+import pandas as pd
+import graphviz
+import pydotplus
+from IPython.display import Image
+import IPython
+# import os
+# os.environ['PATH'] = os.environ['PATH'] + (';')
+iris = load_iris()
+a=pd.concat([pd.DataFrame(iris.data),pd.DataFrame(iris.target)],axis = 1)
+#print(iris.target)
+#print(iris.feature_names)
+#print(type(iris))
+Xtrain,Xtest,Ytrain,Ytest = train_test_split(iris.data,iris.target,test_size=0.3) #这里的0.3参数是指测试集为百分之30
+#print(Xtrain.shape)
+#print(Ytrain)
+clf = tree.DecisionTreeClassifier(criterion="entropy" #这里是用信息熵
+                                  ,random_state=30
+                                  ,splitter="random"
+                                  )
+clf = clf.fit(Xtest,Ytest) #带入训练集参数
+print(Xtest)
+print(Ytest)
+score = clf.score(Xtest,Ytest) #这里是用测试集进行测试
+#print(score)
+feature_name = ['萼片长度（厘米）','萼片宽度（厘米）','花瓣长度（厘米）','花瓣宽度（厘米）']
+#开始绘制
+dot_data = tree.export_graphviz(clf
+                                ,feature_names=feature_name
+                                ,class_names=["1","2","3"]
+                                ,filled=True
+                                ,rounded=True
+                                ,special_characters=True
+                                )
+#graph1 = graphviz.Source(dot_data)
+graph =  pydotplus.graph_from_dot_data(dot_data.replace('helvetica','  "Microsoft YaHei"'))
+#graph.write_pdf("iris.pdf")
+#print('Visible tree plot saved as pdf.')
+#graph1.render("iris")
+graph.write_png('iris.png')	 # 生成png文件
+a=Image(graph.create_png())
