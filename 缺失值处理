@@ -1,0 +1,33 @@
+from pandas import DataFrame
+f=open(r'C:\Users\ycy大帅比\Desktop\软基和数挖\labor.csv','r')
+data=[]
+for i in f:
+    a = i.strip("\n").split(',')
+    data.append(a)
+data = DataFrame(data)
+for c in range(17):
+    sum = 0
+    num = 0
+    zhonglei = {}
+    for i in range(0,len(data[c])):
+        if data[c][i] == '?':
+            continue
+        elif(data[c][i].isdigit() == True):
+            sum = sum + eval(data[c][i])
+            num += 1
+        else:
+            zhonglei[data[c][i]] = zhonglei.get(data[c][i],0) + 1
+    if sum != 0:
+        junzhi = sum/num
+        for i in range(0,len(data[c])):
+            if data[c][i] == "?":
+                data[c][i] = junzhi
+    else:
+        zuiduo = max(zhonglei.values())
+        for i in zhonglei.keys():
+            if zhonglei[i] == zuiduo:
+                duoshuxiang = i
+        for i in range(0,len(data[c])):
+            if data[c][i] == '?':
+                data[c][i]  = duoshuxiang
+print(data)
