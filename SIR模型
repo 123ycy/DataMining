@@ -1,0 +1,40 @@
+import random
+L1={1:[2,3],2:[1,4,5,6,7],3:[1],4:[2],5:[2],6:[2],7:[2]}
+L2={1:[2,3,4],2:[1],3:[1,7],4:[1,6],5:[6],6:[4,5,8],7:[3,9],8:[6,11,13],9:[7,10],10:[9]
+    ,11:[8,12,16],12:[11],13:[8,14,15],14:[13,20],15:[13,19],16:[17,18],17:[16]
+    ,18:[16],19:[15],20:[14]}
+
+def Sir(data):
+    L = []
+    for i in data.keys():
+        L.append(i)
+    first_point = random.choice(L)   #取初始点
+    #s = [1, 2, 3, 4, 5, 6, 7]
+    s = list(range(1,21))
+    #print(s)
+    I = []
+    R = []
+    c = 1.0  #感染概率，调参
+    print("点{}被感染".format(first_point))
+    I.append(first_point)   #记录已经选过的点
+    s.remove(first_point)   #所有点中剔除初始点
+    while I != []:
+        for k in I:
+            for i in data[k]:
+                if i in R:
+                    break
+                else:
+                    a = random.random()
+                    if a<c:
+                        print("点{}被点{}感染".format(i, k))
+                        I.append(i)
+                    else:
+                        print("点{}未被点{}感染".format(i,k))
+            R.append(k)
+            I.remove(k)
+            print("点{}已免疫".format(k))
+
+print("模拟感染过程如下：")
+Sir(L1)
+print("************************************")
+Sir(L2)
