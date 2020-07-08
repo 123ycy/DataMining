@@ -1,0 +1,119 @@
+# 第二次实验关联规则挖掘
+import collections
+import itertools
+
+traDatas = ['abe', 'ae', 'abc', 'ade']  #数据集
+
+
+# 构造Apriori类和全局变量
+class Apriori:
+    traDatas = []  #放置数据集
+    tralen = 0     #数据集长度
+    k = 1          #计数据集的数，如一项集
+    tracount = {}   #过渡集
+    fraTran = {}    #频繁项集
+    sup = 0         #设置最小支持度为1
+    conf = 0
+    freAllTran = {}
+
+    def __init__(self, traDatas, sup, conf): #输入类中的数据
+        self.traDatas = traDatas
+        self.tralen = len(traDatas)
+        self.sup = sup
+        self.conf = conf
+        self.freTran = {}
+        self.tracount = {}
+
+    def scanFirDatas(self):      # 扫描数据
+        tmpStr = ''.join(traDatas)
+        self.tracount = dict(collections.Counter(tmpStr))
+        return self.tracount
+
+
+    def getFreSet(self):          # 寻找频繁项集
+        for tra in self.tracount.keys():
+            # 如果大于最小支持计数，加入频繁项集
+            if self.tracount[tra] >= self.sup and len(tra) == self.k:
+                self.freTran[tra] = self.tracount[tra]
+                self.freAllTran[tra] = self.tracount[tra]
+        self.tracount = {}
+
+    def cmpTwoSet(self, setA, setB):  #这里比较两个项集是否只有一个元素不同，是则返回True
+        setA = set(setA)
+        setB = set(setB)
+        if len(setA - setB) == 1 and len(setB - setA) == 1:
+            return True
+        else:
+            return False
+
+    # 连接 和 剪枝 操作
+    def selfConn(self):
+        for item in itertools.combinations(self.freTran.keys(), 2):
+            if len(item) == self.k + 1:
+                # 将任意两个项集如果 K-2 项相同，剩余的一项不同的两个项集连接
+                if self.cmpTwoSet(item[0], item[1]) == True:
+                    key = ''.join(sorted(set(item[0]).union((set(item[1])))))
+                    if self.cutBranch(key) != False:
+                        self.tracount[key] = 0
+
+
+    def scanDatas(self):       # 扫描计数
+        self.k = self.k + 1
+        for tra in traDatas:
+            for key in self.tracount.keys():
+                self.tracount[key] = self.tracount[key] + self.findChars(tra, key)
+
+    def cutBranch(self, key):           #剪枝操作
+        for subKey in list(itertools.combinations(key, self.k)):
+            # 如果一个项集不是频繁的, 那么后续就不再考虑它
+            if ''.join(list(subKey)) not in self.freTran.keys():
+                return False
+
+    def findChars(self, str, chars):
+        for char in list(chars):
+            if char not in str:
+                return False
+        return 1
+
+    def permutation(self, string, pre_str, container):  # 排列
+        if len(string) == 1:
+            container.append(pre_str + string)
+
+        for idx, str in enumerate(string):
+            new_str = string[:idx] + string[idx + 1:]
+            new_pre_str = pre_str + str
+
+            self.permutation(new_str, new_pre_str, container)
+
+    # 找出频繁项集之后，找出强关联规则，原理是基于支持度记数公式
+    def genAssRule(self):
+        container = []
+        ruleSet = set()
+        for item in self.freTran.keys():
+            self.permutation(item, '', container)
+        for item in container:
+            for i in range(1, len(item)):
+                ruleSet.add((''.join(sorted(item[:1])), ''.join(sorted(item[i:]))))
+        for rule in ruleSet:        # 如果置信度>conf，那么这些规则是强规则，这里设置conf=0.7
+            if self.calcConfi(rule[0], rule[1]) > self.conf:
+                print(rule[0] + "---->>>" + rule[1])
+
+    # 公式为：{A,B,C}——>{D}的置信度为support(ABCD)/ support (ABC)
+    def calcConfi(self, first, last):
+        return self.freAllTran[''.join(sorted(first + last))] / self.freAllTran[''.join(sorted(first))]
+
+    # 构建算法函数(主函数）
+    def algorithm(self):
+        self.scanFirDatas()
+        while self.tracount != {}:
+            self.getFreSet()
+            self.selfConn()
+            self.scanDatas()
+        print("频繁项集为（在支持度阈值为%d,置信度阈值为%.1f的情况下）："%(self.sup,self.conf))
+        print(self.freTran)
+        print("强关联规则为：")
+        self.genAssRule()
+
+
+apriori = Apriori(traDatas, 3, 0.8) #调参
+apriori.algorithm()
