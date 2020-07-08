@@ -1,0 +1,77 @@
+import math
+import matplotlib.pyplot as plt
+
+#导入数据
+def loadDataset():
+    df1 = open(r'C:\Users\ycy大帅比\Desktop\软基和数挖\数挖课设\测试1.txt','r')
+    data = []
+    for i in df1.readlines(): #指导书步骤有些问题，个人readlines读取数据
+        i = i.strip('\t').split()
+        #print(i)
+        data.append(list((float(i[0]),float(i[1]))))
+    #print(data)
+    return data
+
+def distance(x,y):   #计算欧式距离
+    return math.sqrt(pow(x[0]-y[0],2)+pow(x[1]-y[1],2))
+
+def scandata(data,radius,Minpts):  #参数设置：data为数据，radius为半径，Minpts限定点的个数
+    data1 = []
+    data2 = loadDataset()
+    for this in data:  #this表示初始点
+        #print(this)
+        num = 0
+        this.append([])
+        #print(this)
+        for then in data2: #then表示下一个点
+            #print(then)
+            if this == then:
+                continue
+            else:
+                if distance(this,then) <= radius and distance(this,then)>0:  #用距离进行判断
+                    this[2].append(then)     #将下一个点记入
+                    num += 1
+        if (num-1) >= Minpts:  #判断点的个数
+            this.append(1)
+        else:
+            this.append(0)
+        data1.append(this)
+        #print(this)
+    #print(data1)
+    return data1
+
+def deal(data):
+    cluster = []
+    for point in data:
+        #print(point)
+        if point[3] == 0:  #若等于0，说明周围点数＜阈值，不考虑
+            continue
+        else:
+            temp = []   #等于1则说明符合核心点要求，继续
+            temp.append(point)
+            #print(temp)
+            for item in temp:
+                if item[3] == 1:  #这步多余了，前面已经判定过
+                    for others in item[2]:  #取出符合条件的其余点
+                        if others in data:
+                            data.remove(others)
+                            temp.append(others)
+                            #print(temp)
+        cluster.append(temp)
+    return  cluster
+
+data = loadDataset()
+data1 = scandata(data,0.0005,8)  #这里是设置的两个参数非常重要
+cluster = deal(data1)
+#print(cluster)
+num = 1
+for item in cluster:
+    print(item)
+    #print("The cluster is:")
+    for point in item:
+        #print(str(point[0]) + ' ' + str(point[1]))
+        plt.scatter(point[0], point[1], c=['b'])
+    num = num +1
+plt.show()
+
+
