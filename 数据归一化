@@ -1,0 +1,39 @@
+import numpy as np
+import pandas as pd
+import cufflinks as cf
+from cufflinks import iplot
+
+#首先读取iris数据，函数名设置和指导书一样
+def lodairsi(address):
+    spf = pd.read_csv(address, sep=',', index_col=False, header=None )
+    strs = spf[4]
+    print(spf)
+    spf.drop([4], axis=1, inplace=True)  #删除第五列class,axix = 1表示列
+    spf.iplot(kind='bar',barmode='stack')
+    return spf.values, strs
+
+def normalization(data_matrix):
+    e = 1e-5 # 防止出现 0，加一个拉普拉斯因子
+    for c in range(0,4):
+        #print(type(data_matrix))
+        maxNum = (np.max( data_matrix[:,c]))  #提取最大值
+        minNum = (np.min( data_matrix[:,c]))  #提取最小值
+        #print(maxNum)
+        #print(minNum)
+        #print(type(maxNum))
+        data_matrix[:,c] = ((data_matrix[:,c]) - minNum + e )/(maxNum - minNum +e )  #按照归一化公式进行归一
+    return data_matrix
+
+if __name__ == "__main__":
+    filepath = r"C:\Users\ycy大帅比\Desktop\软基和数挖\iris.csv"
+    writepath = r"C:\Users\ycy大帅比\Desktop\软基和数挖\iris_normal.csv"
+    data_matrix , str_name = lodairsi(filepath)
+    #print(data_matrix)
+    data_change = np.array(data_matrix , dtype=float)
+    data_matrix = normalization(data_matrix)
+    #print(data_matrix)
+    spf = pd.DataFrame(data_matrix)
+    strs = str_name.values
+    spf.insert(4, 4, strs)
+    spf.to_csv(writepath, index=False, header=False) #写入
+
